@@ -38,26 +38,29 @@ from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+from predict_MC import predict_MC
 
 names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Gaussian Process",
          "Decision Tree", "Random Forest"]
 
 classifiers = [
     KNeighborsClassifier(3),
-    SVC(kernel="linear", C=0.025),
-    SVC(gamma=2, C=1),
+    SVC(kernel="linear", C=0.025, probability = True),
+    SVC(gamma=2, C=1, probability = True),
     GaussianProcessClassifier(1.0 * RBF(1.0)),
     DecisionTreeClassifier(max_depth=5),
     RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1)]
 
-X, y = make_classification(n_samples = 10000, n_features=2, n_redundant=0, n_informative=2,
+n_samples = 1000
+X, y = make_classification(n_samples = n_samples, n_features=2, n_redundant=0, n_informative=2,
                            random_state=1, n_clusters_per_class=1)
 rng = np.random.RandomState(2)
 X += 2 * rng.uniform(size=X.shape)
 linearly_separable = (X, y)
 
-datasets = [make_moons(n_samples = 1000, noise=0.3, random_state=0),
-            make_circles(n_samples = 1000, noise=0.2, factor=0.5, random_state=1),
+datasets = [make_moons(n_samples = n_samples, noise=0.3, random_state=0),
+            make_circles(n_samples = n_samples, noise=0.2, factor=0.5, random_state=1),
             linearly_separable
             ]
 
@@ -83,7 +86,7 @@ for j, ds in enumerate(datasets):
     print('\n')
 
 
-miss_index = rng.choice(X_test.shape[0], 1000)
+miss_index = rng.choice(X_test.shape[0], int(n_samples/10))
 
 accuracy_median_impute = pd.DataFrame(np.empty([len(names), len(datasets)]))
 accuracy_median_impute.index = names
@@ -96,7 +99,7 @@ for j, ds in enumerate(datasets):
     X_train, X_test, y_train, y_test = \
         train_test_split(X, y, test_size=.4, random_state=42)
     train_median = np.median(X_train[:,0])
-    X_test[miss_index,:] = train_median
+    X_test[miss_index,1] = train_median
 
     for i, name, clf in zip(range(len(names)), names, classifiers):
         clf.fit(X_train, y_train)
@@ -118,7 +121,7 @@ for j, ds in enumerate(datasets):
     X_train, X_test, y_train, y_test = \
         train_test_split(X, y, test_size=.4, random_state=42)
     train_mean = np.mean(X_train[:,0])
-    X_test[miss_index,:] = train_mean
+    X_test[miss_index,1] = train_mean
 
     for i, name, clf in zip(range(len(names)), names, classifiers):
         clf.fit(X_train, y_train)
@@ -141,7 +144,7 @@ for j, ds in enumerate(datasets):
     X_train, X_test, y_train, y_test = \
         train_test_split(X, y, test_size=.4, random_state=42)
     train_zero = 0
-    X_test[miss_index,:] = train_zero
+    X_test[miss_index,1] = train_zero
 
     for i, name, clf in zip(range(len(names)), names, classifiers):
         clf.fit(X_train, y_train)
@@ -150,3 +153,26 @@ for j, ds in enumerate(datasets):
         print((name + ' in ' + dataset_names[j] + ': ' + '{:.3f}'.format(score)).rjust(50))
         
     print('\n')
+
+    
+accuracy_MC_impute = pd.DataFrame(np.empty([len(names), len(datasets)]))
+accuracy_MC_impute.index = names
+accuracy_MC_impute.columns = dataset_names
+
+# iterate over datasets
+for j, ds in enumerate(datasets):
+    # preprocess dataset, split into training and test part
+    X, y = ds
+    X_train, X_test, y_train, y_test = \
+        train_test_split(X, y, test_size=.4, random_state=42)
+    
+    for i, name, clf in zip(range(len(names)), names, classifiers):
+        clf.fit(X_train, y_train)
+        pred = predict_MC(clf, X_train, X_test)
+        score = accuracy_score(y_test, pred)
+        accuracy_MC_impute.iloc[i,j] = score
+        print((name + ' in ' + dataset_names[j] + ': ' + '{:.3f}'.format(score)).rjust(50))
+        
+    print('\n')    
+    
+    
