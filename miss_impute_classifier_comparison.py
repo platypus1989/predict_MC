@@ -40,6 +40,9 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from predict_MC import predict_MC
+import matplotlib.pyplot as plt
+import seaborn as sns
+from matplotlib.colors import LinearSegmentedColormap
 
 names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Gaussian Process",
          "Decision Tree", "Random Forest"]
@@ -165,7 +168,7 @@ for j, ds in enumerate(datasets):
     X, y = ds
     X_train, X_test, y_train, y_test = \
         train_test_split(X, y, test_size=.4, random_state=42)
-    
+    X_test[miss_index,1] = np.nan
     for i, name, clf in zip(range(len(names)), names, classifiers):
         clf.fit(X_train, y_train)
         pred = predict_MC(clf, X_train, X_test)
@@ -175,4 +178,37 @@ for j, ds in enumerate(datasets):
         
     print('\n')    
     
-    
+
+accuracy_no_miss, accuracy_median_impute, accuracy_mean_impute, accuracy_zero_impute, accuracy_MC_impute   
+
+accuracy_array = np.array([accuracy_median_impute.values, accuracy_mean_impute.values, 
+                           accuracy_zero_impute.values, accuracy_MC_impute.values])
+accuracy_array.argmax(axis=0)
+
+
+accuracy_MC_order = pd.DataFrame(accuracy_array.shape[0] - accuracy_array.argsort(axis=0).argsort(axis=0)[3,:,:])
+accuracy_MC_order.index = names
+accuracy_MC_order.columns = dataset_names
+
+
+sns.set()
+
+myColors = ((0.8, 0.0, 0.0, 1.0), (0.0, 0.8, 0.0, 1.0), (0.0, 0.0, 0.8, 1.0))
+cmap = LinearSegmentedColormap.from_list('Custom', myColors, len(myColors))
+
+ax = sns.heatmap(accuracy_MC_order, cmap=cmap, linewidths=.5, linecolor='lightgray')
+
+# Manually specify colorbar labelling after it's been generated
+colorbar = ax.collections[0].colorbar
+colorbar.set_ticks([1.2, 2, 2.8])
+colorbar.set_ticklabels(['1', '2', '3'])
+
+# X - Y axis labels
+ax.set_ylabel('Classifiers')
+ax.set_xlabel('Simulation Scheme')
+
+# Only y-axis labels need their rotation set, x-axis labels already have a rotation of 0
+_, labels = plt.yticks()
+plt.setp(labels, rotation=0)
+
+plt.show()
