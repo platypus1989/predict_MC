@@ -39,7 +39,7 @@ from sklearn.gaussian_process.kernels import RBF
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
-from predict_MC import predict_MC
+from predict_MC import MC_model
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.colors import LinearSegmentedColormap
@@ -171,7 +171,8 @@ for j, ds in enumerate(datasets):
     X_test[miss_index,1] = np.nan
     for i, name, clf in zip(range(len(names)), names, classifiers):
         clf.fit(X_train, y_train)
-        pred = predict_MC(clf, X_train, X_test)
+        MC_model_obj = MC_model(clf, X_train)
+        pred = MC_model_obj.predict_MC(X_test)
         score = accuracy_score(y_test, pred)
         accuracy_MC_impute.iloc[i,j] = score
         print((name + ' in ' + dataset_names[j] + ': ' + '{:.3f}'.format(score)).rjust(50))
