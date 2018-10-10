@@ -43,6 +43,8 @@ from predict_MC import MC_model
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.colors import LinearSegmentedColormap
+from rpy2 import robjects
+import rpy2
 
 names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Gaussian Process",
          "Decision Tree", "Random Forest"]
@@ -195,6 +197,7 @@ accuracy_MC_order.columns = dataset_names
 sns.set()
 
 myColors = ((0.8, 0.0, 0.0, 1.0), (0.0, 0.8, 0.0, 1.0), (0.0, 0.0, 0.8, 1.0))
+
 cmap = LinearSegmentedColormap.from_list('Custom', myColors, len(myColors))
 
 ax = sns.heatmap(accuracy_MC_order, cmap=cmap, linewidths=.5, linecolor='lightgray')
@@ -211,5 +214,35 @@ ax.set_xlabel('Simulation Scheme')
 # Only y-axis labels need their rotation set, x-axis labels already have a rotation of 0
 _, labels = plt.yticks()
 plt.setp(labels, rotation=0)
-
+plt.tight_layout()
+plt.savefig('image/Monte_Carlo_Imputation_rank.png', dpi=200)
 plt.show()
+
+#methods = ['median', 'mean', 'zero', 'MC']
+#
+#n_shape = len(dataset_names)
+#n_model = len(names)
+#n_method = len(methods)
+#
+#accuracy_table = pd.DataFrame({'imputation' : np.repeat(range(4), n_shape*n_model),
+#                               'shape' : dataset_names*n_model*n_method,
+#                               'model' : list(np.repeat(names, n_shape)) * n_method,
+#                               'accuracy' : accuracy_array.flatten()})
+#
+#g = sns.FacetGrid(accuracy_table, col="shape",  row="model")
+#g.map_dataframe(accuracy_table, "date", "val")
+#
+#
+#def lineplot(x, y, **kwargs):
+#    ax = plt.gca()
+#    data = kwargs.pop("data")
+#    data.plot(x=x, y=y, ax=ax, grid=False, **kwargs)
+#g = sns.FacetGrid(accuracy_table, col="shape",  row="model")    
+#g = g.map_dataframe(lineplot, x='imputation', y="accuracy")
+#
+#
+#robjects.pandas2ri.activate()
+#r_dataframe = robjects.pandas2ri.py2ri(accuracy_table)
+#robjects.globalenv["df"] = r_dataframe
+
+
