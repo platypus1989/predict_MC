@@ -20,13 +20,6 @@ The plots show training points in solid colors and testing points
 semi-transparent. The lower right shows the classification accuracy on the test
 set.
 """
-print(__doc__)
-
-
-# Code source: Gaël Varoquaux
-#              Andreas Müller
-# Modified for documentation by Jaques Grobler
-# License: BSD 3 clause
 
 import numpy as np
 import pandas as pd
@@ -48,7 +41,8 @@ import rpy2
 
 names = ["Nearest Neighbors", "Linear SVM", "RBF SVM", "Gaussian Process",
          "Decision Tree", "Random Forest"]
-
+#names = ["Nearest Neighbors", "RBF SVM", "Gaussian Process",
+#         "Decision Tree", "Random Forest"]
 classifiers = [
     KNeighborsClassifier(3),
     SVC(kernel="linear", C=0.025, probability = True),
@@ -136,7 +130,7 @@ for j, ds in enumerate(datasets):
         
     print('\n')
 
-    
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
     
 accuracy_zero_impute = pd.DataFrame(np.empty([len(names), len(datasets)]))
 accuracy_zero_impute.index = names
@@ -204,7 +198,7 @@ ax = sns.heatmap(accuracy_MC_order, cmap=cmap, linewidths=.5, linecolor='lightgr
 
 # Manually specify colorbar labelling after it's been generated
 colorbar = ax.collections[0].colorbar
-colorbar.set_ticks([1.2, 2, 2.8])
+colorbar.set_ticks([1, 2, 3])
 colorbar.set_ticklabels(['1', '2', '3'])
 
 # X - Y axis labels
@@ -245,4 +239,20 @@ plt.show()
 #r_dataframe = robjects.pandas2ri.py2ri(accuracy_table)
 #robjects.globalenv["df"] = r_dataframe
 
+def convert_to_df(dataset):
+    df = pd.DataFrame(np.hstack([dataset[0], dataset[1].reshape([dataset[1].shape[0], 1])]))
+    df.columns = ['x', 'y', 'label']
+    return df
+
+datasets_df = [convert_to_df(i) for i in datasets]
+
+
+plt.figure(figsize=(24, 6))
+
+for i in range(3):
+    plt.subplot(1, 3, i+1)
+    ax = sns.scatterplot(x="x", y="y", hue='label', data=datasets_df[i]).set_title(dataset_names[i], fontsize=50)
+
+plt.savefig('image/simulation_data_scatterplot.png', dpi=200)
+plt.show()
 

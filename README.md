@@ -19,5 +19,6 @@ With the approach, we did a simulation study to compare with the simple imputati
 class response(linear, moon-shaped and circle-shaped) and 6 different models (KNN, Linear SVM, RBF SVM, Naive Bayes, Decision Tree and Random Forest). 
 We randomly pick 25% of one variable of test data to be missing and apply 4 imputation methods to make predictions. We calculate the accuracies resulting
 from different data scenarios x model x imputation and rank them by imputation methods. In the plot below we show the rank of Monte Carlo imputation in
-4 methods in different cases. We can see in more than half of the cases, it ranked the first and there is only one case it ranked 3rd of 4 methods.  
+4 methods in different cases. We can see in 2/3 of the cases, it ranked the first and there are only two cases it ranked 3rd out of 4 methods 
+(note that these results of course, are random state dependent, but we have found the results to be generally consistent).  
 <img src="image/Monte_Carlo_Imputation_rank.png" width="600">

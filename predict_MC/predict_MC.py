@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from time import time
 
 def MC_miss(train_array, pred_obs, impute_ind, sample_n = 100):
